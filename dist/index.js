@@ -26379,7 +26379,9 @@ async function Run() {
             for (const log of logs) {
                 try {
                     const logContent = await fs.readFile(log, 'utf8');
+                    core.info(`::group::${log}`);
                     core.info(logContent);
+                    core.info('::endgroup::');
                 } catch (error) {
                     log.error(`Failed to read log file: ${log}\n${error}`);
                 }
@@ -26400,24 +26402,30 @@ async function getCommandArgs() {
     let args = ['+@ShutdownOnFailedCommand', '1'];
     const username = core.getInput('username', { required: true });
     args.push('+login', username);
-    const hasConfig = core.getInput('config') !== undefined;
+    let isLoggedIn = false;
+    const configPath = path.join(STEAM_DIR, 'config', 'config.vdf');
 
-    if (hasConfig) {
-        const config = core.getInput('config');
-        const configPath = path.join(STEAM_DIR, 'config', 'config.vdf');
-        try {
-            await fs.access(configPath, fs.constants.R_OK);
-            core.warning('Steam user config.vdf file already exists! The existing file will be overwritten.');
-        } catch (error) {
-            // do nothing
-        }
-        await fs.writeFile(configPath, Buffer.from(config, 'base64'));
+    try {
         await fs.access(configPath, fs.constants.R_OK);
-    } else {
-        const password = core.getInput('password', { required: true });
-        const shared_secret = core.getInput('shared_secret', { required: true });
-        const code = steamTotp.generateAuthCode(shared_secret);
-        args.push(password, '+set_steam_guard_code', code);
+        isLoggedIn = true;
+    } catch (error) {
+        // do nothing
+    }
+
+    if (!isLoggedIn) {
+        const config = core.getInput('config');
+        if (config) {
+            await fs.writeFile(configPath, Buffer.from(config, 'base64'));
+            await fs.access(configPath, fs.constants.R_OK);
+        } else {
+            const password = core.getInput('password', { required: true });
+            let code = core.getInput('code');
+            if (!code) {
+                const shared_secret = core.getInput('shared_secret', { required: true });
+                code = steamTotp.generateAuthCode(shared_secret);
+            }
+            args.push(password, '+set_steam_guard_code', code);
+        }
     }
 
     let appBuildPath = core.getInput('app_build');
@@ -26481,7 +26489,7 @@ async function generateWorkshopItemVdf(appId, workshopItemId, contentRoot, descr
     const workshopItemPath = path.join(steamworks, 'workshop_item.vdf');
     let workshopItem = `"workshopitem"\n{\n\t"appid" "${appId}"\n\t"publishedfileid" "${workshopItemId}"\n\t"contentfolder" "${contentRoot}"\n`;
     if (description) {
-        workshopItem += `\t"changenote" "${description}"\n`;
+        workshopItem += `\t"description" "${description}"\n`;
     }
     workshopItem += '}';
     core.debug(workshopItem);
@@ -26516,6 +26524,9 @@ async function generateBuildVdf(appId, contentRoot, description, set_live, depot
         appBuild += `\t\t\t"DepotPath" "." // mapped into the root of the depot\n`;
         appBuild += `\t\t\t"recursive" "1" // include all subfolders\n`;
         appBuild += `\t\t}\n`;
+        appBuild += `\t\t"FileExclusion" "*.pdb" // don't include symbols\n`;
+        appBuild += `\t\t"FileExclusion" "**/*_BurstDebugInformation_DoNotShip*" // don't include unity build folders\n`;
+        appBuild += `\t\t"FileExclusion" "**/*_BackUpThisFolder_ButDontShipItWithYourGame*" // don't include unity build folders\n`;
 
         if (depot_file_exclusions_list) {
             depot_file_exclusions_list.forEach(exclusion => {
