@@ -26375,33 +26375,39 @@ async function Run() {
     }
 
     if (printLogs) {
-        try {
-            const logsDir = path.join(STEAM_DIR, 'logs');
-            const logs = await fs.readdir(logsDir);
-            for (const log of logs) {
-                try {
-                    const logContent = await fs.readFile(log, 'utf8');
-                    core.info(`::group::${log}`);
-                    core.info(logContent);
-                    core.info('::endgroup::');
-                } catch (error) {
-                    log.error(`Failed to read log file: ${log}\n${error}`);
-                }
-            }
-        } catch (error) {
-            core.error(`Failed to read logs directory: ${logsDir}\n${error}`);
-        }
+        await printLogsInDirectory(build_output);
+        await printLogsInDirectory(path.join(STEAM_DIR, 'logs'));
+        await printLogsInDirectory(path.join(steamworks, 'buildoutput'));
     }
 }
 
 module.exports = { Run }
+
+async function printLogsInDirectory(directory) {
+    core.debug(`Reading logs from: ${directory}`);
+    try {
+        const logs = await fs.readdir(directory);
+        for (const log of logs) {
+            try {
+                const logContent = await fs.readFile(log, 'utf8');
+                core.info(`::group::${log}`);
+                core.info(logContent);
+                core.info('::endgroup::');
+            } catch (error) {
+                log.error(`Failed to read log: ${log}\n${error}`);
+            }
+        }
+    } catch (error) {
+        core.error(`Failed to read logs in ${directory}!\n${error}`);
+    }
+}
 
 async function getCommandArgs() {
     if (!STEAM_DIR) {
         throw new Error('STEAM_DIR is not defined.');
     }
 
-    let args = ['+@ShutdownOnFailedCommand', '1'];
+    let args = [];
     const username = core.getInput('username', { required: true });
     args.push('+login', username);
     let isLoggedIn = await verify_login(STEAM_DIR);
@@ -26427,8 +26433,6 @@ async function getCommandArgs() {
             args.push(password, '+set_steam_guard_code', code);
         }
     }
-
-    args.push('+info');
 
     let appBuildPath = core.getInput('app_build');
 
