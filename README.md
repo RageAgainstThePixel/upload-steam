@@ -86,12 +86,12 @@ Can be obtained from Steam Guard Authenticator app. Usually is temporary and res
 
 ### Shared Secret
 
-> ![WARNING]
+> [!WARNING]
 > Obtaining a shared secret from the Steam Guard Authenticator app is challenging and complicated.
 > It is recommended to use the [config](#config) setup.
 > This shared secret should not be checked into source control or shared with anyone!
 
-> ![IMPORTANT]
+> [!IMPORTANT]
 > If you've already got SteamGuard setup for your account and you remove it, you'll have to wait 3 days before being able to publish a live build.
 
 * Detailed instructions can be found [here](https://gist.github.com/mathielo/8367e464baa73941a075bae4dd5eed90)
@@ -115,5 +115,5 @@ To setup steamcmd for continuous integration, or just on a machine or VM that wi
   * In a new bash terminal run `base64 <sdk>/config/config.vdf > encoded.txt`
 * Copy the contents of the encoded text file and paste it in `STEAM_CONFIG` secret in github actions.
 
-> ![NOTE]
+> [!NOTE]
 > If you change your account's security settings you'll need to follow these steps again.
