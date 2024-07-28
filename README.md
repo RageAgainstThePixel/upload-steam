@@ -6,12 +6,14 @@ This action assumes you are registered as a [partner](https://partner.steamgames
 
 ## How to use
 
-This action assumes some secrets to be set in your repository
+This action assumes some secrets to be set in your repository:
 
 * `STEAM_USERNAME`: The username of your steamworks build account
 * `STEAM_PASSWORD`: The password for the account
-* `STEAM_SHARED_SECRET`: Optional, a Steam Guard shared secret ([setup steps](#setup-shared-secrets))
-* `STEAM_CONFIG`: Optional, a steam account config.vdf encoded as base64 string ([setup steps](#setup-config))
+* `STEAM_SHARED_SECRET`: Optional, a Steam Guard shared secret ([setup steps](#shared-secret))
+* `STEAM_CONFIG`: Optional, a steam account config.vdf encoded as base64 string ([setup steps](#config))
+* `STEAM_SSFN`: Optional, a steam ssfn file encoded as base64 string. Required with `STEAM_CONFIG` setup.
+* `STEAM_SSFN_NAME`: Optional, the name of the STEAM_SSFN file that was encoded. Required with `STEAM_CONFIG` setup.
 
 ### outputs
 
@@ -29,7 +31,22 @@ steps:
     with:
       username: ${{ secrets.STEAM_USERNAME }}
       password: ${{ secrets.STEAM_PASSWORD }}
-      shared_secret: ${{ secrets.STEAM_SHARED_SECRET }}
+      config: ${{ secrets.STEAM_CONFIG }}
+      ssfn: ${{ secrets.STEAM_SSFN }}
+      ssfn_name: ${{ secrets.STEAM_SSFN_NAME }}
+      app_id: 1000
+      description: 'Your build description here'
+      content_root: '${{ github.workspace }}/Build'
+      set_live: 'beta'
+      depot_file_exclusions: |
+        bin/tools*
+        *.meta
+      install_scripts: 'localization/german/german_installscript.vdf'
+    # use outputs
+  - run: |
+      manifest="${{ steps.upload.outputs.manifest }}"
+      cat $manifest
+    shell: bash
 ```
 
 ### inputs
@@ -41,6 +58,8 @@ steps:
 | `totp` | A temporary one time pass code (totp) from Steam Guard. | if `shared_secret` and `config` are not provided |
 | `shared_secret` |  The [shared secret](#shared-secret) from Steam Guard's two-factor authentication. | if `totp` and `config` are not provided. |
 | `config` | Steam [config.vdf](#config) encoded as base64 string. | if `password`, `totp` and `shared_secret` are not provided. |
+| `ssfn` | Steam SSFN file encoded as base64 string. | if `config` is provided. |
+| `ssfn_name` | The name of the encoded `ssfn` file | if `ssfn is provided. |
 | `app_id` | The app id of the game. | if `app_build` or `workshop_item` are not provided. |
 | `workshop_item_id` | The `publishedfileid`. To create a new item `app_id` must be set and `workshop_item_id` be set to 0. To update an existing item, both `app_id` and `workshop_item_id` must be set. | for workshop item uploads and if `workshop_item` is not provided. |
 | `description` | Either the build description or workshop item description. If an `app_build` or `workshop_item` file is provided, this will be ignored. | false |

@@ -17,6 +17,12 @@ inputs:
   config:
     description: 'Steam config.vdf file contents as base64 encoded string. Required if `password`, `totp` and `shared_secret` are not provided.'
     required: false
+  ssfn:
+    description: 'Steam SSFN file encoded as base64 string. Required if `config` is provided.'
+    required: false
+  ssfn_name:
+    description: 'Name of the encoded SSFN file. Required if `ssfn` is provided.'
+    required: false
   app_id:
     description: 'Steam App ID. Required if `app_build` or `workshop_item` are not provided.'
     required: false

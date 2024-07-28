@@ -26360,6 +26360,7 @@ const STEAM_DIR = process.env.STEAM_DIR;
 const WORKSPACE = process.env.GITHUB_WORKSPACE;
 const RUNNER_TEMP = process.env.RUNNER_TEMP;
 const steamworks = path.join(RUNNER_TEMP, '.steamworks');
+const build_output = path.join(RUNNER_TEMP, 'output');
 
 async function Run() {
     let printLogs = core.isDebug();
@@ -26415,6 +26416,10 @@ async function getCommandArgs() {
     if (!isLoggedIn) {
         const config = core.getInput('config');
         if (config) {
+            const ssfn = core.getInput('ssfn', { required: true });
+            const ssfnName = core.getInput('ssfn_name', { required: true });
+            const ssfnPath = path.join(STEAM_DIR, ssfnName);
+            await fs.writeFile(ssfnPath, Buffer.from(ssfn, 'base64'));
             await fs.writeFile(configPath, Buffer.from(config, 'base64'));
             await fs.access(configPath, fs.constants.R_OK);
         } else {
@@ -26501,7 +26506,10 @@ async function generateWorkshopItemVdf(appId, workshopItemId, contentRoot, descr
 async function generateBuildVdf(appId, contentRoot, description, set_live, depot_file_exclusions_list, install_scripts_list, depots_list) {
     await verify_temp_dir();
     const appBuildPath = path.join(steamworks, 'app_build.vdf');
-    let appBuild = `"AppBuild"\n{\n\t"AppID" "${appId}"\n\t"ContentRoot" "${contentRoot}"\n`;
+    let appBuild = `"AppBuild"\n{\n`;
+    appBuild += `\t"appid" "${appId}"\n`;
+    appBuild += `\t"ContentRoot" "${contentRoot}"\n`;
+    appBuild += `\t"BuildOutput" "${build_output}"\n`;
     if (description) {
         appBuild += `\t"Desc" "${description}"\n`;
     }
@@ -26558,6 +26566,7 @@ async function verify_temp_dir() {
         // do nothing
     }
     await fs.mkdir(steamworks);
+    await fs.mkdir(build_output);
 }
 
 
