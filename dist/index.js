@@ -26416,10 +26416,12 @@ async function getCommandArgs() {
     if (!isLoggedIn) {
         const config = core.getInput('config');
         if (config) {
-            const ssfn = core.getInput('ssfn', { required: true });
-            const ssfnName = core.getInput('ssfn_name', { required: true });
-            const ssfnPath = path.join(STEAM_DIR, ssfnName);
-            await fs.writeFile(ssfnPath, Buffer.from(ssfn, 'base64'));
+            const ssfn = core.getInput('ssfn');
+            if (ssfn) {
+                const ssfnName = core.getInput('ssfn_name', { required: true });
+                const ssfnPath = path.join(STEAM_DIR, ssfnName);
+                await fs.writeFile(ssfnPath, Buffer.from(ssfn, 'base64'));
+            }
             await fs.writeFile(configPath, Buffer.from(config, 'base64'));
             await fs.access(configPath, fs.constants.R_OK);
         } else {
