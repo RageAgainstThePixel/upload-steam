@@ -26357,6 +26357,7 @@ const steamTotp = __nccwpck_require__(3627);
 
 const steamcmd = 'steamcmd';
 const STEAM_DIR = process.env.STEAM_DIR;
+const STEAM_CMD = process.env.STEAM_CMD;
 const WORKSPACE = process.env.GITHUB_WORKSPACE;
 const RUNNER_TEMP = process.env.RUNNER_TEMP;
 const steamworks = path.join(RUNNER_TEMP, '.steamworks');
@@ -26403,15 +26404,7 @@ async function getCommandArgs() {
     let args = ['+@ShutdownOnFailedCommand', '1'];
     const username = core.getInput('username', { required: true });
     args.push('+login', username);
-    let isLoggedIn = false;
-    const configPath = path.join(STEAM_DIR, 'config', 'config.vdf');
-
-    try {
-        await fs.access(configPath, fs.constants.R_OK);
-        isLoggedIn = true;
-    } catch (error) {
-        // do nothing
-    }
+    let isLoggedIn = await verify_login(STEAM_DIR);
 
     if (!isLoggedIn) {
         const config = core.getInput('config');
@@ -26434,6 +26427,8 @@ async function getCommandArgs() {
             args.push(password, '+set_steam_guard_code', code);
         }
     }
+
+    args.push('+info');
 
     let appBuildPath = core.getInput('app_build');
 
@@ -26558,6 +26553,18 @@ async function generateBuildVdf(appId, contentRoot, description, set_live, depot
     await fs.writeFile(appBuildPath, appBuild);
     await fs.access(appBuildPath, fs.constants.R_OK);
     return appBuildPath;
+}
+
+async function verify_login(directory) {
+    const configPath = path.join(directory, 'config', 'config.vdf');
+
+    try {
+        await fs.access(configPath, fs.constants.R_OK);
+        return true;
+    } catch (error) {
+        if (directory === STEAM_CMD) { return false; }
+        return await verify_login(STEAM_CMD);
+    }
 }
 
 async function verify_temp_dir() {
