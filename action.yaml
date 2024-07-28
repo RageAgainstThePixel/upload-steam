@@ -1,0 +1,54 @@
+name: 'Upload to Steam'
+description: 'A GitHub action for uploading an app build or workshop item to Steam.'
+
+inputs:
+  username:
+    description: 'Steam username'
+    required: true
+  password:
+    description: 'Steam password. Required if config is not provided.'
+    required: false
+  shared_secret:
+    description: 'Steam shared secret. Required if config is not provided.'
+    required: false
+  config:
+    description: 'Steam config.vdf file contents as base64 encoded string. Required if shared_secret is not provided.'
+    required: false
+  app_id:
+    description: 'Steam App ID. Required if app_build or workshop_item is not provided.'
+    required: false
+  workshop_id:
+    description: 'Steam Workshop ID. Required for workshop item uploads. Required if workshop_item is not provided.'
+    required: false
+  description:
+    description: 'Either the build description or workshop item changelog. If an app_build or workshop_item file is provided, this will be ignored.'
+    required: false
+  content_root:
+    description: 'The root folder of your game files, can be an absolute path or relative to the build script file. If an app_build or workshop_item file is provided, this will be ignored. Defaults to GitHub workspace.'
+    required: false
+  set_live:
+    description: 'Beta branch name to automatically set live after successful build, none if empty. Note that the default branch can not be set live automatically. That must be done through the App Admin panel. If an app_build file is provided, this will be ignored.'
+    required: false
+  depot_file_exclusions:
+    description: 'A list of paths to exclude from the depot that will excluded mapped files again and can also contain wildcards like "?" or "*". If an app_build file is provided, this will be ignored.'
+    required: false
+  install_scripts:
+    description: 'The path(s) to a predefined install_script.vdf file(s). If an app_build file is provided, this will be ignored.'
+    required: false
+  depots:
+    description: 'The path(s) to a predefined depot_build.vdf file(s). If an app_build file is provided, this will be ignored.'
+    required: false
+  app_build:
+    description: 'Optional, The path to a predefined app_build.vdf file.'
+    required: false
+  workshop_item:
+    description: 'Optional, The path to a predefined workshop_item.vdf file.'
+    required: false
+
+outputs:
+  manifest:
+    description: 'Path to the generated manifest.vdf file.'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+  post: 'dist/index.js'
