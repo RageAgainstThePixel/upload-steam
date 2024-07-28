@@ -26498,7 +26498,7 @@ async function generateWorkshopItemVdf(appId, workshopItemId, contentRoot, descr
         workshopItem += `\t"description" "${description}"\n`;
     }
     workshopItem += '}';
-    core.debug(workshopItem);
+    core.info(workshopItem);
     await fs.writeFile(workshopItemPath, workshopItem);
     await fs.access(workshopItemPath, fs.constants.R_OK);
     return workshopItemPath;
@@ -26553,7 +26553,7 @@ async function generateBuildVdf(appId, contentRoot, description, set_live, depot
     }
 
     appBuild += '}';
-    core.debug(appBuild);
+    core.info(appBuild);
     await fs.writeFile(appBuildPath, appBuild);
     await fs.access(appBuildPath, fs.constants.R_OK);
     return appBuildPath;
