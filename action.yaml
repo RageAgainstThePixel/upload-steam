@@ -9,10 +9,10 @@ inputs:
     description: 'Steam password. Required if `config` is not provided.'
     required: false
   totp:
-    description: 'A temporary one time pass code (totp) from Steam Guard. Required if `shared_secret` and `config` are not provided.'
+    description: 'A temporary one time pass code (totp) from SteamGuard. Required if `shared_secret` and `config` are not provided.'
     required: false
   shared_secret:
-    description: 'The shared secret for Steam Guard''s two-factor authentication. Required if `totp` and `config` are not provided.'
+    description: 'The shared secret for SteamGuard''s two-factor authentication. Required if `totp` and `config` are not provided.'
     required: false
   config:
     description: 'Steam config.vdf file contents as base64 encoded string. Required if `password`, `totp` and `shared_secret` are not provided.'

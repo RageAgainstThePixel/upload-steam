@@ -84,6 +84,8 @@ async function getCommandArgs() {
         }
     }
 
+    args.push('+info');
+
     let appBuildPath = core.getInput('app_build');
 
     if (appBuildPath) {

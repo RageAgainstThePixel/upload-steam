@@ -2,22 +2,18 @@
 
 A GitHub action for uploading an [app build](https://partner.steamgames.com/doc/sdk/uploading#4) or [workshop item](https://partner.steamgames.com/doc/features/workshop/implementation#SteamCmd) to Steam.
 
-This action assumes you are registered as a [partner](https://partner.steamgames.com/) with Steam.
-
 ## How to use
 
-This action assumes some secrets to be set in your repository:
+This action assumes you are registered as a [partner](https://partner.steamgames.com/) with Steam.
+
+This action also assumes some secrets to be set in your repository:
 
 * `STEAM_USERNAME`: The username of your steamworks build account
 * `STEAM_PASSWORD`: The password for the account
-* `STEAM_SHARED_SECRET`: Optional, a Steam Guard shared secret ([setup steps](#shared-secret))
+* `STEAM_SHARED_SECRET`: Optional, a SteamGuard shared secret ([setup steps](#shared-secret))
 * `STEAM_CONFIG`: Optional, a steam account config.vdf encoded as base64 string ([setup steps](#config))
 * `STEAM_SSFN`: Optional, a steam ssfn file encoded as base64 string. Optional, with `STEAM_CONFIG` setup.
 * `STEAM_SSFN_NAME`: Optional, the name of the `STEAM_SSFN` file that was encoded. Required with `STEAM_SSFN`.
-
-### outputs
-
-* `manifest`: The path to the resulting build manifest.
 
 ### workflow
 
@@ -30,10 +26,7 @@ steps:
     id: upload
     with:
       username: ${{ secrets.STEAM_USERNAME }}
-      password: ${{ secrets.STEAM_PASSWORD }}
       config: ${{ secrets.STEAM_CONFIG }}
-      ssfn: ${{ secrets.STEAM_SSFN }}
-      ssfn_name: ${{ secrets.STEAM_SSFN_NAME }}
       app_id: 1000
       description: 'Your build description here'
       content_root: '${{ github.workspace }}/Build'
@@ -55,10 +48,10 @@ steps:
 | ---- | ----------- | -------- |
 | `username` | A Steamworks [build account](https://partner.steamgames.com/doc/sdk/uploading#Build_Account) name with the "Edit App Metadata" and "Publish App Changes To Steam" permissions granted. | true |
 | `password` | The password for the account. | if `config` is not provided. |
-| `totp` | A temporary one time pass code (totp) from Steam Guard. | if `shared_secret` and `config` are not provided |
-| `shared_secret` |  The [shared secret](#shared-secret) from Steam Guard's two-factor authentication. | if `totp` and `config` are not provided. |
+| `totp` | A temporary one time pass code (totp) from SteamGuard. | if `shared_secret` and `config` are not provided |
+| `shared_secret` |  The [shared secret](#shared-secret) from SteamGuard's two-factor authentication. | if `totp` and `config` are not provided. |
 | `config` | Steam [config.vdf](#config) encoded as base64 string. | if `password`, `totp` and `shared_secret` are not provided. |
-| `ssfn` | Steam SSFN file encoded as base64 string. | Optional, if `config` is provided. |
+| `ssfn` | Steam SSFN file encoded as base64 string. This is an optional addition to `config`. | Optional, if `config` is provided. |
 | `ssfn_name` | The name of the encoded `ssfn` file | if `ssfn` is provided. |
 | `app_id` | The app id of the game. | if `app_build` or `workshop_item` are not provided. |
 | `workshop_item_id` | The `publishedfileid`. To create a new item `app_id` must be set and `workshop_item_id` be set to 0. To update an existing item, both `app_id` and `workshop_item_id` must be set. | for workshop item uploads and if `workshop_item` is not provided. |
@@ -71,30 +64,22 @@ steps:
 | `app_build` | The path to a predefined app_build.vdf file. Overrides all other set options. | false |
 | `workshop_item` | 'Optional, The path to a predefined workshop_item.vdf file. Overrides all other set options. | false |
 
+### outputs
+
+* `manifest`: The path to the resulting build manifest.
+
 ## Multi-Factor Authentication Setup
 
 Deploying to Steam requires using Multi-Factor Authentication (MFA).
 This action requires at least one of these authentication methods are set:
 
-* `totp`: A temporary one time pass code from Steam Guard Authenticator app.
-* `shared_secret`: The [shared secret](#shared-secret) from Steam Guard's two-factor authentication.
+* `totp`: A temporary one time pass code (totp) from SteamGuard Authenticator app.
 * `config`: Steam [config.vdf](#config) encoded as base64 string.
+* `shared_secret`: The [shared secret](#shared-secret) from SteamGuard's two-factor authentication.
 
 ### Temporary One Time Pass Code
 
-Can be obtained from Steam Guard Authenticator app. Usually is temporary and resets after a set amount of time.
-
-### Shared Secret
-
-> [!WARNING]
-> Obtaining a shared secret from the Steam Guard Authenticator app is challenging and complicated.
-> It is recommended to use the [config](#config) setup.
-> This shared secret should not be checked into source control or shared with anyone!
-
-> [!IMPORTANT]
-> If you've already got SteamGuard setup for your account and you remove it, you'll have to wait 3 days before being able to publish a live build.
-
-* Detailed instructions can be found [here](https://gist.github.com/mathielo/8367e464baa73941a075bae4dd5eed90)
+Can be obtained from SteamGuard Authenticator app. Usually is temporary and resets after a set amount of time.
 
 ### Config
 
@@ -106,14 +91,30 @@ To setup steamcmd for continuous integration, or just on a machine or VM that wi
 * Navigate to `sdk/tools/ContentBuilder/builder` (or osx/linux if on non-windows)
 * Copy the path to the steamcmd executable (`steamcmd.exe` for windows, `steamcmd.sh` for osx/linux)
 * In a new terminal run `<sdk>/steamcmd.exe +login <username>`
-* Enter your `password`, and the Steam Guard totp
+  * If prompted, enter your password and the SteamGuard totp
 * Type `info`, and you should see your account listed as connected
 * Type `quit`
-* The folder where you ran `steamcmd` will now contain new content with config directory.
+* The folder where you ran `steamcmd` should now contain new content with config directory.
   * `<sdk>/config/config.vdf`
+  * If you're unable to locate this file, it can also be located in your steam installation directory
+    * windows: `C:/Program Files(x86)/Steam/config/config.vdf`
+    * linux: `~/home/<user>/Steam/config/config.vdf`
+    * osx: `~/Library/Application\ Support/Steam/config/config.vdf`
 * Encode the file to base64 string
-  * In a new bash terminal run `base64 <sdk>/config/config.vdf > encoded.txt`
+  * In a new `bash` terminal run `base64 <sdk>/config/config.vdf > encoded_config.txt`
 * Copy the contents of the encoded text file and paste it in `STEAM_CONFIG` secret in github actions.
 
 > [!NOTE]
-> If you change your account's security settings you'll need to follow these steps again.
+> If you change your account's security settings or get a new code sent to your email, you'll need to follow these steps again.
+
+### Shared Secret
+
+> [!WARNING]
+> Obtaining a shared secret from the SteamGuard Authenticator app is challenging and complicated.
+> It is recommended to use the [config](#config) setup.
+> This shared secret should not be checked into source control or shared with anyone!
+
+> [!IMPORTANT]
+> If you've already got SteamGuard setup for your account and you remove it, you'll have to wait 3 days before being able to publish a live build.
+
+* Detailed instructions can be found [here](https://gist.github.com/mathielo/8367e464baa73941a075bae4dd5eed90)
