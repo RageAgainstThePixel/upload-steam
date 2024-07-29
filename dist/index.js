@@ -26344,8 +26344,7 @@ async function Login() {
 }
 
 async function IsLoggedIn() {
-    const username = core.getInput('username', { required: true });
-    const args = ['+login', username, '+info', '+quit'];
+    const args = ['+info', '+quit'];
     const output = await steamcmd.Exec(args);
     return !output.includes('Logon state: Logged Off');
 }
