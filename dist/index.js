@@ -26402,6 +26402,7 @@ const steamworks = path.join(RUNNER_TEMP, '.steamworks');
 const build_output = path.join(steamworks, 'buildoutput');
 
 async function Run() {
+    let fail = undefined;
     let printLogs = core.isDebug();
 
     try {
@@ -26409,12 +26410,16 @@ async function Run() {
         await exec.exec(steamcmd, args);
     } catch (error) {
         printLogs = true;
-        core.setFailed(error);
+        fail = error;
     }
 
     await logging.PrintLogs(steamworks);
     await logging.PrintLogs(path.join(STEAM_DIR, 'logs'));
     await logging.PrintLogs(path.join(STEAM_CMD, 'logs'));
+
+    if (fail) {
+        core.setFailed(fail);
+    }
 }
 
 module.exports = { Run }
