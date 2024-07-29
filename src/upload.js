@@ -25,8 +25,10 @@ async function Run() {
         fail = error;
     }
 
-    await logging.PrintLogs(steamworks);
-    await logging.PrintLogs(path.join(STEAM_CMD, 'logs'));
+    if (printLogs) {
+        await logging.PrintLogs(steamworks);
+        await logging.PrintLogs(path.join(STEAM_CMD, 'logs'));
+    }
 
     if (fail) {
         core.setFailed(fail);
