@@ -7,7 +7,7 @@ const logging = require('./logging');
 
 const steamcmd = 'steamcmd';
 const STEAM_DIR = process.env.STEAM_DIR;
-const STEAM_CMD = process.env.STEAM_CMD;
+const STEAM_CMD = path.join(process.env.STEAM_CMD, '..');
 const WORKSPACE = process.env.GITHUB_WORKSPACE;
 const RUNNER_TEMP = process.env.RUNNER_TEMP;
 const steamworks = path.join(RUNNER_TEMP, '.steamworks');
@@ -26,8 +26,7 @@ async function Run() {
     }
 
     await logging.PrintLogs(steamworks);
-    await logging.PrintLogs(path.join(STEAM_DIR, 'logs'));
-    await logging.PrintLogs(path.join(STEAM_CMD, '..', 'logs'));
+    await logging.PrintLogs(path.join(STEAM_CMD, 'logs'));
 
     if (fail) {
         core.setFailed(fail);

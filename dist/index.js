@@ -26334,17 +26334,20 @@ const core = __nccwpck_require__(2186);
 const fs = __nccwpck_require__(3292);
 
 async function PrintLogs(directory) {
-    core.info(`Reading logs from: ${directory}`);
+    core.info(directory);
     try {
         const logs = await fs.readdir(directory, { recursive: true });
         for (const log of logs) {
             try {
-                const logContent = await fs.readFile(`${directory}/${log}`, 'utf8');
+                const path = `${directory}/${log}`;
+                const stat = await fs.stat(path);
+                if (!stat.isFile()) { continue; }
+                const logContent = await fs.readFile(path, 'utf8');
                 core.info(`::group::${log}`);
                 core.info(logContent);
                 core.info('::endgroup::');
             } catch (error) {
-                core.error(`Failed to read log: ${log}\n${error.message}`);
+                core.error(`Failed to read log: ${path}\n${error.message}`);
             }
         }
     } catch (error) {
@@ -26364,18 +26367,12 @@ const core = __nccwpck_require__(2186);
 const logging = __nccwpck_require__(1751);
 const path = __nccwpck_require__(1017);
 
-const STEAM_DIR = process.env.STEAM_DIR;
-const STEAM_CMD = process.env.STEAM_CMD;
-const RUNNER_TEMP = process.env.RUNNER_TEMP;
-const steamworks = path.join(RUNNER_TEMP, '.steamworks');
-
 async function Run() {
     try {
-        await logging.PrintLogs(steamworks);
-        await logging.PrintLogs(path.join(STEAM_DIR, 'logs'));
-        await logging.PrintLogs(path.join(STEAM_CMD, '..', 'logs'));
+        await logging.PrintLogs(path.join(process.env.RUNNER_TEMP, '.steamworks'));
+        await logging.PrintLogs(path.join(process.env.STEAM_CMD, '..', 'logs'));
     } catch (error) {
-        core.error(error);
+        core.error(error.message);
     }
 };
 
@@ -26396,7 +26393,7 @@ const logging = __nccwpck_require__(1751);
 
 const steamcmd = 'steamcmd';
 const STEAM_DIR = process.env.STEAM_DIR;
-const STEAM_CMD = process.env.STEAM_CMD;
+const STEAM_CMD = path.join(process.env.STEAM_CMD, '..');
 const WORKSPACE = process.env.GITHUB_WORKSPACE;
 const RUNNER_TEMP = process.env.RUNNER_TEMP;
 const steamworks = path.join(RUNNER_TEMP, '.steamworks');
@@ -26415,8 +26412,7 @@ async function Run() {
     }
 
     await logging.PrintLogs(steamworks);
-    await logging.PrintLogs(path.join(STEAM_DIR, 'logs'));
-    await logging.PrintLogs(path.join(STEAM_CMD, '..', 'logs'));
+    await logging.PrintLogs(path.join(STEAM_CMD, 'logs'));
 
     if (fail) {
         core.setFailed(fail);
