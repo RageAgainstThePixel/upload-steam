@@ -26482,7 +26482,7 @@ async function getCommandArgs() {
 
     if (workshopItemPath) {
         await fs.access(workshopItemPath, fs.constants.R_OK);
-        args.push('+workshop_build_item', `"${workshopItemPath}"`, '+quit');
+        args.push('+workshop_build_item', workshopItemPath, '+quit');
         return args;
     }
 
@@ -26495,7 +26495,7 @@ async function getCommandArgs() {
 
     if (workshopItemId) {
         workshopItemPath = await generateWorkshopItemVdf(appId, workshopItemId, contentRoot, description);
-        args.push('+workshop_build_item', `"${workshopItemPath}"`, '+quit');
+        args.push('+workshop_build_item', workshopItemPath, '+quit');
         return args;
     }
 
@@ -26523,7 +26523,7 @@ async function getCommandArgs() {
     }
 
     appBuildPath = await generateBuildVdf(appId, contentRoot, description, set_live, depot_file_exclusions_list, install_scripts_list, depots_list);
-    args.push('+run_app_build', `"${appBuildPath}"`, '+quit');
+    args.push('+run_app_build', appBuildPath, '+quit');
     return args;
 }
 
@@ -26597,7 +26597,11 @@ async function generateBuildVdf(appId, contentRoot, description, set_live, depot
 }
 
 async function verify_temp_dir() {
-    await fs.mkdir(BUILD_OUTPUT);
+    try {
+        await fs.access(BUILD_OUTPUT, fs.constants.R_OK);
+    } catch (error) {
+        await fs.mkdir(BUILD_OUTPUT);
+    }
 }
 
 
