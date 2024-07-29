@@ -26344,7 +26344,7 @@ async function PrintLogs(directory) {
                 core.info(logContent);
                 core.info('::endgroup::');
             } catch (error) {
-                log.error(`Failed to read log: ${log}\n${error}`);
+                core.error(`Failed to read log: ${log}\n${error}`);
             }
         }
     } catch (error) {
