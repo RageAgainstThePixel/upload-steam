@@ -14,7 +14,19 @@ const build_output = path.join(STEAM_TEMP, 'buildoutput');
 async function Run() {
     try {
         const args = await getCommandArgs();
-        await exec.exec(steamcmd, args);
+        try {
+            await exec.exec(steamcmd, args);
+        } catch (error) {
+            const logFile = getErrorLogPath();
+            core.debug(`Printing error log: ${logFile}`);
+            try {
+                await fs.access(logFile);
+                const log = await fs.readFile(logFile, 'utf8');
+                core.info(log);
+            } catch (error) {
+                // ignore error
+            }
+        }
     } catch (error) {
         core.setFailed(error);
     }
@@ -183,4 +195,10 @@ async function generateBuildVdf(appId, contentRoot, description, set_live, depot
 
 async function verify_temp_dir() {
     await fs.mkdir(build_output);
+}
+
+function getErrorLogPath() {
+    let root = STEAM_DIR;
+    if (process.platform === 'win32') { root = STEAM_CMD; }
+    return path.join(root, 'logs', 'stderr.txt');
 }

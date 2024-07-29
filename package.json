@@ -29,6 +29,6 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "ncc build src/index.js -o dist --source-map --license licenses.txt"
+    "build": "npm install && vpm ci && ncc build src/index.js -o dist --source-map --license licenses.txt"
   }
 }
