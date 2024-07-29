@@ -26401,6 +26401,7 @@ function getSSFNPath(ssfnName) {
 const exec = __nccwpck_require__(1514);
 const core = __nccwpck_require__(2186);
 const fs = __nccwpck_require__(3292);
+const path = __nccwpck_require__(1017);
 
 const STEAM_DIR = process.env.STEAM_DIR;
 const STEAM_CMD = process.env.STEAM_CMD;
@@ -26563,8 +26564,9 @@ async function generateBuildVdf(appId, contentRoot, description, set_live, depot
         });
         appBuild += `\t}\n`;
     } else {
+        const depotId = parseInt(appId) + 1;
         appBuild += `\t"Depots"\n\t{\n`;
-        appBuild += `\t\t"DepotID" "${appId + 1}"\n`;
+        appBuild += `\t\t"DepotID" "${depotId}"\n`;
         appBuild += `\t\t"FileMapping"\n\t\t{\n`;
         appBuild += `\t\t\t"LocalPath" "*" // all files from content root folder\n`;
         appBuild += `\t\t\t"DepotPath" "." // mapped into the root of the depot\n`;

@@ -1,6 +1,7 @@
 const exec = require('@actions/exec');
 const core = require('@actions/core');
 const fs = require('fs/promises');
+const path = require('path');
 
 const STEAM_DIR = process.env.STEAM_DIR;
 const STEAM_CMD = process.env.STEAM_CMD;
