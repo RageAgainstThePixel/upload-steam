@@ -26378,6 +26378,7 @@ async function getLoginArgs() {
         args.push(password, '+set_steam_guard_code', code);
     }
     args.push('+info', '+quit');
+    return args;
 }
 
 function getConfigPath() {
