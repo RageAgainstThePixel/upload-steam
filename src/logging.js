@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const fs = require('fs/promises');
 
 async function PrintLogs(directory) {
-    core.debug(`Reading logs from: ${directory}`);
+    core.info(`Reading logs from: ${directory}`);
     try {
         const logs = await fs.readdir(directory);
         for (const log of logs) {

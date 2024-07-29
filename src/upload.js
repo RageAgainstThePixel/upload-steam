@@ -27,6 +27,7 @@ async function Run() {
     if (printLogs) {
         await logging.PrintLogs(build_output);
         await logging.PrintLogs(path.join(STEAM_DIR, 'logs'));
+        await logging.PrintLogs(path.join(STEAM_CMD, 'logs'));
         await logging.PrintLogs(path.join(steamworks, 'buildoutput'));
     }
 }
