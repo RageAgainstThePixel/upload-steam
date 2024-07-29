@@ -1,71 +1,23 @@
 const core = require('@actions/core');
-const exec = require('@actions/exec');
 const fs = require('fs/promises');
 const path = require('path');
-const steamTotp = require('steam-totp');
+const steamcmd = require('./steamcmd');
 
-const steamcmd = 'steamcmd';
-const STEAM_DIR = process.env.STEAM_DIR;
-const STEAM_CMD = process.env.STEAM_CMD;
 const STEAM_TEMP = process.env.STEAM_TEMP;
 const WORKSPACE = process.env.GITHUB_WORKSPACE;
 const build_output = path.join(STEAM_TEMP, 'buildoutput');
 
 async function Run() {
-    try {
-        const args = await getCommandArgs();
-        try {
-            await exec.exec(steamcmd, args);
-        } catch (error) {
-            const logFile = getErrorLogPath();
-            core.debug(`Printing error log: ${logFile}`);
-            try {
-                await fs.access(logFile);
-                const log = await fs.readFile(logFile, 'utf8');
-                core.info(log);
-            } catch (error) {
-                // ignore error
-            }
-        }
-    } catch (error) {
-        core.setFailed(error);
-    }
+    const args = await getCommandArgs();
+    await steamcmd.Exec(args);
 }
 
 module.exports = { Run }
 
 async function getCommandArgs() {
-    if (!STEAM_DIR) {
-        throw new Error('STEAM_DIR is not defined.');
-    }
-
     let args = [];
     const username = core.getInput('username', { required: true });
     args.push('+login', username);
-
-    const config = core.getInput('config');
-
-    if (config) {
-        const ssfn = core.getInput('ssfn');
-        if (ssfn) {
-            const ssfnName = core.getInput('ssfn_name', { required: true });
-            const ssfnPath = path.join(STEAM_DIR, ssfnName);
-            await fs.writeFile(ssfnPath, Buffer.from(ssfn, 'base64'));
-        }
-        const configPath = path.join(STEAM_CMD, 'config', 'config.vdf');
-        await fs.writeFile(configPath, Buffer.from(config, 'base64'));
-        await fs.access(configPath, fs.constants.R_OK);
-    } else {
-        const password = core.getInput('password', { required: true });
-        let code = core.getInput('code');
-        if (!code) {
-            const shared_secret = core.getInput('shared_secret', { required: true });
-            code = steamTotp.generateAuthCode(shared_secret);
-        }
-        args.push(password, '+set_steam_guard_code', code);
-    }
-
-    args.push('+info');
 
     let appBuildPath = core.getInput('app_build');
 
@@ -195,10 +147,4 @@ async function generateBuildVdf(appId, contentRoot, description, set_live, depot
 
 async function verify_temp_dir() {
     await fs.mkdir(build_output);
-}
-
-function getErrorLogPath() {
-    let root = STEAM_DIR;
-    if (process.platform === 'win32') { root = STEAM_CMD; }
-    return path.join(root, 'logs', 'stderr.txt');
 }

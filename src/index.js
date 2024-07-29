@@ -1,7 +1,30 @@
+const core = require('@actions/core');
 const upload = require('./upload');
+const auth = require('./auth');
+const STEAM_DIR = process.env.STEAM_DIR;
+const STEAM_CMD = process.env.STEAM_CMD;
+
+const IS_POST = !!core.getState('isPost');
 
 const main = async () => {
-    await upload.Run();
+    try {
+        if (!STEAM_DIR) {
+            throw new Error('STEAM_DIR is not defined.');
+        }
+        if (!STEAM_CMD) {
+            throw new Error('STEAM_CMD is not defined.');
+        }
+        if (!IS_POST) {
+            core.saveState('isPost', 'true');
+            const isLoggedIn = await auth.IsLoggedIn();
+            if (!isLoggedIn) {
+                await auth.Login();
+            }
+            await upload.Run();
+        }
+    } catch (error) {
+        core.setFailed(error);
+    }
 }
 
 main();
