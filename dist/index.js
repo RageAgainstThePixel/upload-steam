@@ -26476,6 +26476,7 @@ async function getCommandArgs() {
 
     const appId = core.getInput('app_id', { required: true });
     const contentRoot = core.getInput('content_root') || WORKSPACE;
+    await fs.access(contentRoot, fs.constants.R_OK);
     const description = core.getInput('description');
 
     const workshopItemId = core.getInput('workshop_item_id');
