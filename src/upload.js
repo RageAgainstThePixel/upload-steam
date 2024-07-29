@@ -5,7 +5,7 @@ const steamcmd = require('./steamcmd');
 
 const STEAM_TEMP = process.env.STEAM_TEMP;
 const WORKSPACE = process.env.GITHUB_WORKSPACE;
-const build_output = path.join(STEAM_TEMP, 'buildoutput');
+const BUILD_OUTPUT = path.join(STEAM_TEMP, 'buildoutput');
 
 async function Run() {
     const args = await getCommandArgs();
@@ -74,11 +74,11 @@ async function getCommandArgs() {
     appBuildPath = await generateBuildVdf(appId, contentRoot, description, set_live, depot_file_exclusions_list, install_scripts_list, depots_list);
     args.push('+run_app_build', `"${appBuildPath}"`, '+quit');
     return args;
-};
+}
 
 async function generateWorkshopItemVdf(appId, workshopItemId, contentFolder, description) {
     await verify_temp_dir();
-    const workshopItemPath = path.join(steamworks, 'workshop_item.vdf');
+    const workshopItemPath = path.join(STEAM_TEMP, 'workshop_item.vdf');
     let workshopItem = `"workshopitem"\n{\n\t"appid" "${appId}"\n\t"publishedfileid" "${workshopItemId}"\n\t"contentfolder" "${contentFolder}"\n`;
     if (description) {
         workshopItem += `\t"description" "${description}"\n`;
@@ -88,15 +88,15 @@ async function generateWorkshopItemVdf(appId, workshopItemId, contentFolder, des
     await fs.writeFile(workshopItemPath, workshopItem);
     await fs.access(workshopItemPath, fs.constants.R_OK);
     return workshopItemPath;
-};
+}
 
 async function generateBuildVdf(appId, contentRoot, description, set_live, depot_file_exclusions_list, install_scripts_list, depots_list) {
     await verify_temp_dir();
-    const appBuildPath = path.join(steamworks, 'app_build.vdf');
+    const appBuildPath = path.join(STEAM_TEMP, 'app_build.vdf');
     let appBuild = `"AppBuild"\n{\n`;
     appBuild += `\t"AppID" "${appId}"\n`;
     appBuild += `\t"ContentRoot" "${contentRoot}"\n`;
-    appBuild += `\t"BuildOutput" "${build_output}"\n`;
+    appBuild += `\t"BuildOutput" "${BUILD_OUTPUT}"\n`;
     if (description) {
         appBuild += `\t"Desc" "${description}"\n`;
     }
@@ -146,5 +146,5 @@ async function generateBuildVdf(appId, contentRoot, description, set_live, depot
 }
 
 async function verify_temp_dir() {
-    await fs.mkdir(build_output);
+    await fs.mkdir(BUILD_OUTPUT);
 }
