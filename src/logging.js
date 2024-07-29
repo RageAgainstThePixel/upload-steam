@@ -7,7 +7,7 @@ async function PrintLogs(directory, clear = false) {
         const logs = await fs.readdir(directory, { recursive: true });
         for (const log of logs) {
             try {
-                const path = path.join(directory, log);
+                const path = `${directory}/${log}`;
                 const stat = await fs.stat(path);
                 if (!stat.isFile()) { continue; }
                 const logContent = await fs.readFile(path, 'utf8');
