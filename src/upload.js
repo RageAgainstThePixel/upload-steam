@@ -3,35 +3,20 @@ const exec = require('@actions/exec');
 const fs = require('fs/promises');
 const path = require('path');
 const steamTotp = require('steam-totp');
-const logging = require('./logging');
 
 const steamcmd = 'steamcmd';
 const STEAM_DIR = process.env.STEAM_DIR;
-const STEAM_CMD = path.join(process.env.STEAM_CMD, '..');
+const STEAM_CMD = process.env.STEAM_CMD;
+const STEAM_TEMP = process.env.STEAM_TEMP;
 const WORKSPACE = process.env.GITHUB_WORKSPACE;
-const RUNNER_TEMP = process.env.RUNNER_TEMP;
-const steamworks = path.join(RUNNER_TEMP, '.steamworks');
-const build_output = path.join(steamworks, 'buildoutput');
+const build_output = path.join(STEAM_TEMP, 'buildoutput');
 
 async function Run() {
-    let fail = undefined;
-    let printLogs = core.isDebug();
-
     try {
         const args = await getCommandArgs();
         await exec.exec(steamcmd, args);
     } catch (error) {
-        printLogs = true;
-        fail = error;
-    }
-
-    if (printLogs) {
-        await logging.PrintLogs(steamworks);
-        await logging.PrintLogs(path.join(STEAM_CMD, 'logs'));
-    }
-
-    if (fail) {
-        core.setFailed(fail);
+        core.setFailed(error);
     }
 }
 
@@ -47,6 +32,7 @@ async function getCommandArgs() {
     args.push('+login', username);
 
     const config = core.getInput('config');
+
     if (config) {
         const ssfn = core.getInput('ssfn');
         if (ssfn) {
@@ -196,12 +182,5 @@ async function generateBuildVdf(appId, contentRoot, description, set_live, depot
 }
 
 async function verify_temp_dir() {
-    try {
-        await fs.access(steamworks, fs.constants.R_OK);
-        await fs.rm(steamworks, { recursive: true });
-    } catch (error) {
-        // do nothing
-    }
-    await fs.mkdir(steamworks);
     await fs.mkdir(build_output);
 }
