@@ -114,28 +114,30 @@ async function generateBuildVdf(appId, contentRoot, description, set_live, depot
     } else {
         const depotId = parseInt(appId) + 1;
         appBuild += `\t"Depots"\n\t{\n`;
-        appBuild += `\t\t"DepotID" "${depotId}"\n`;
-        appBuild += `\t\t"FileMapping"\n\t\t{\n`;
-        appBuild += `\t\t\t"LocalPath" "*" // all files from content root folder\n`;
-        appBuild += `\t\t\t"DepotPath" "." // mapped into the root of the depot\n`;
-        appBuild += `\t\t\t"recursive" "1" // include all subfolders\n`;
-        appBuild += `\t\t}\n`;
-        appBuild += `\t\t"FileExclusion" "*.pdb" // don't include symbols\n`;
-        appBuild += `\t\t"FileExclusion" "**/*_BurstDebugInformation_DoNotShip*" // don't include unity build folders\n`;
-        appBuild += `\t\t"FileExclusion" "**/*_BackUpThisFolder_ButDontShipItWithYourGame*" // don't include unity build folders\n`;
+        appBuild += `\t\t"${depotId}"\n`;
+        appBuild += `\t\t{\n`;
+        appBuild += `\t\t\t"FileMapping"\n\t\t{\n`;
+        appBuild += `\t\t\t\t"LocalPath" "*" // all files from content root folder\n`;
+        appBuild += `\t\t\t\t"DepotPath" "." // mapped into the root of the depot\n`;
+        appBuild += `\t\t\t\t"recursive" "1" // include all subfolders\n`;
+        appBuild += `\t\t\t}\n`;
+        appBuild += `\t\t\t"FileExclusion" "*.pdb" // don't include symbols\n`;
+        appBuild += `\t\t\t"FileExclusion" "**/*_BurstDebugInformation_DoNotShip*" // don't include unity build folders\n`;
+        appBuild += `\t\t\t"FileExclusion" "**/*_BackUpThisFolder_ButDontShipItWithYourGame*" // don't include unity build folders\n`;
 
         if (depot_file_exclusions_list) {
             depot_file_exclusions_list.forEach(exclusion => {
-                appBuild += `\t\t"FileExclusion" "${exclusion}"\n`;
+                appBuild += `\t\t\t"FileExclusion" "${exclusion}"\n`;
             });
         }
 
         if (install_scripts_list) {
             install_scripts_list.forEach(script => {
-                appBuild += `\t\t"InstallScript" "${script}"\n`;
+                appBuild += `\t\t\t"InstallScript" "${script}"\n`;
             });
         }
 
+        appBuild += `\t\t}\n`;
         appBuild += `\t}\n`;
     }
 
