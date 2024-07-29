@@ -26336,7 +26336,7 @@ const fs = __nccwpck_require__(3292);
 async function PrintLogs(directory) {
     core.info(`Reading logs from: ${directory}`);
     try {
-        const logs = await fs.readdir(directory, { withFileTypes: true, recursive: true });
+        const logs = await fs.readdir(directory, { recursive: true });
         for (const log of logs) {
             try {
                 const logContent = await fs.readFile(log, 'utf8');
