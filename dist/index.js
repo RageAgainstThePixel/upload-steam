@@ -26462,7 +26462,7 @@ async function getCommandArgs() {
 
     if (appBuildPath) {
         await fs.access(appBuildPath, fs.constants.R_OK);
-        args.push('+run_app_build', appBuildPath, '+quit');
+        args.push('+run_app_build', `${appBuildPath}`, '+quit');
         return args;
     }
 
@@ -26470,12 +26470,12 @@ async function getCommandArgs() {
 
     if (workshopItemPath) {
         await fs.access(workshopItemPath, fs.constants.R_OK);
-        args.push('+workshop_build_item', workshopItemPath, '+quit');
+        args.push('+workshop_build_item', `${workshopItemPath}`, '+quit');
         return args;
     }
 
     const appId = core.getInput('app_id', { required: true });
-    const contentRoot = core.getInput('content_root') || WORKSPACE;
+    const contentRoot = path.resolve(core.getInput('content_root') || WORKSPACE);
     await fs.access(contentRoot, fs.constants.R_OK);
     const description = core.getInput('description');
 
@@ -26483,7 +26483,7 @@ async function getCommandArgs() {
 
     if (workshopItemId) {
         workshopItemPath = await generateWorkshopItemVdf(appId, workshopItemId, contentRoot, description);
-        args.push('+workshop_build_item', workshopItemPath, '+quit');
+        args.push('+workshop_build_item', `${workshopItemPath}`, '+quit');
         return args;
     }
 
@@ -26511,14 +26511,14 @@ async function getCommandArgs() {
     }
 
     appBuildPath = await generateBuildVdf(appId, contentRoot, description, set_live, depot_file_exclusions_list, install_scripts_list, depots_list);
-    args.push('+run_app_build', appBuildPath, '+quit');
+    args.push('+run_app_build', `${appBuildPath}`, '+quit');
     return args;
 };
 
-async function generateWorkshopItemVdf(appId, workshopItemId, contentRoot, description) {
+async function generateWorkshopItemVdf(appId, workshopItemId, contentFolder, description) {
     await verify_temp_dir();
     const workshopItemPath = path.join(steamworks, 'workshop_item.vdf');
-    let workshopItem = `"workshopitem"\n{\n\t"appid" "${appId}"\n\t"publishedfileid" "${workshopItemId}"\n\t"contentfolder" "${contentRoot}"\n`;
+    let workshopItem = `"workshopitem"\n{\n\t"appid" "${appId}"\n\t"publishedfileid" "${workshopItemId}"\n\t"contentfolder" "${contentFolder}"\n`;
     if (description) {
         workshopItem += `\t"description" "${description}"\n`;
     }
@@ -26533,7 +26533,7 @@ async function generateBuildVdf(appId, contentRoot, description, set_live, depot
     await verify_temp_dir();
     const appBuildPath = path.join(steamworks, 'app_build.vdf');
     let appBuild = `"AppBuild"\n{\n`;
-    appBuild += `\t"appid" "${appId}"\n`;
+    appBuild += `\t"AppID" "${appId}"\n`;
     appBuild += `\t"ContentRoot" "${contentRoot}"\n`;
     appBuild += `\t"BuildOutput" "${build_output}"\n`;
     if (description) {
