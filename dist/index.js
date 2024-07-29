@@ -26435,29 +26435,29 @@ async function getCommandArgs() {
     let args = [];
     const username = core.getInput('username', { required: true });
     args.push('+login', username);
-    let isLoggedIn = await verify_login(STEAM_DIR);
 
-    if (!isLoggedIn) {
-        const config = core.getInput('config');
-        if (config) {
-            const ssfn = core.getInput('ssfn');
-            if (ssfn) {
-                const ssfnName = core.getInput('ssfn_name', { required: true });
-                const ssfnPath = path.join(STEAM_DIR, ssfnName);
-                await fs.writeFile(ssfnPath, Buffer.from(ssfn, 'base64'));
-            }
-            await fs.writeFile(configPath, Buffer.from(config, 'base64'));
-            await fs.access(configPath, fs.constants.R_OK);
-        } else {
-            const password = core.getInput('password', { required: true });
-            let code = core.getInput('code');
-            if (!code) {
-                const shared_secret = core.getInput('shared_secret', { required: true });
-                code = steamTotp.generateAuthCode(shared_secret);
-            }
-            args.push(password, '+set_steam_guard_code', code);
+    const config = core.getInput('config');
+    if (config) {
+        const ssfn = core.getInput('ssfn');
+        if (ssfn) {
+            const ssfnName = core.getInput('ssfn_name', { required: true });
+            const ssfnPath = path.join(STEAM_DIR, ssfnName);
+            await fs.writeFile(ssfnPath, Buffer.from(ssfn, 'base64'));
         }
+        const configPath = path.join(STEAM_CMD, 'config', 'config.vdf');
+        await fs.writeFile(configPath, Buffer.from(config, 'base64'));
+        await fs.access(configPath, fs.constants.R_OK);
+    } else {
+        const password = core.getInput('password', { required: true });
+        let code = core.getInput('code');
+        if (!code) {
+            const shared_secret = core.getInput('shared_secret', { required: true });
+            code = steamTotp.generateAuthCode(shared_secret);
+        }
+        args.push(password, '+set_steam_guard_code', code);
     }
+
+    args.push('+info');
 
     let appBuildPath = core.getInput('app_build');
 
@@ -26583,18 +26583,6 @@ async function generateBuildVdf(appId, contentRoot, description, set_live, depot
     await fs.writeFile(appBuildPath, appBuild);
     await fs.access(appBuildPath, fs.constants.R_OK);
     return appBuildPath;
-}
-
-async function verify_login(directory) {
-    const configPath = path.join(directory, 'config', 'config.vdf');
-
-    try {
-        await fs.access(configPath, fs.constants.R_OK);
-        return true;
-    } catch (error) {
-        if (directory === STEAM_CMD) { return false; }
-        return await verify_login(STEAM_CMD);
-    }
 }
 
 async function verify_temp_dir() {
