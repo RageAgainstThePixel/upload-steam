@@ -26532,7 +26532,7 @@ async function generateWorkshopItemVdf(appId, workshopItemId, contentFolder, des
     await verify_temp_dir();
     const workshopItemPath = path.join(STEAM_TEMP, 'workshop_item.vdf');
     let workshopItem = `"workshopitem"\n{\n\t"appid" "${appId}"\n\t"publishedfileid" "${workshopItemId}"\n\t"contentfolder" "${contentFolder}"\n`;
-    if (description) {
+    if (description && description !== '') {
         workshopItem += `\t"description" "${description}"\n`;
     }
     workshopItem += '}';
@@ -26549,10 +26549,10 @@ async function generateBuildVdf(appId, contentRoot, description, set_live, depot
     appBuild += `\t"AppID" "${appId}"\n`;
     appBuild += `\t"ContentRoot" "${contentRoot}"\n`;
     appBuild += `\t"BuildOutput" "${BUILD_OUTPUT}"\n`;
-    if (description) {
+    if (description && description !== '') {
         appBuild += `\t"Desc" "${description}"\n`;
     }
-    if (set_live) {
+    if (set_live && set_live !== '') {
         appBuild += `\t"SetLive" "${set_live}"\n`;
     }
     if (depots_list) {
