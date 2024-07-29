@@ -26327,22 +26327,65 @@ exports["default"] = _default;
 
 /***/ }),
 
+/***/ 1751:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const core = __nccwpck_require__(2186);
+const fs = __nccwpck_require__(3292);
+
+async function PrintLogs(directory) {
+    core.debug(`Reading logs from: ${directory}`);
+    try {
+        const logs = await fs.readdir(directory);
+        for (const log of logs) {
+            try {
+                const logContent = await fs.readFile(log, 'utf8');
+                core.info(`::group::${log}`);
+                core.info(logContent);
+                core.info('::endgroup::');
+            } catch (error) {
+                log.error(`Failed to read log: ${log}\n${error}`);
+            }
+        }
+    } catch (error) {
+        core.error(`Failed to read logs in ${directory}!\n${error}`);
+    }
+}
+
+module.exports = { PrintLogs }
+
+
+/***/ }),
+
 /***/ 8303:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const core = __nccwpck_require__(2186);
 const exec = __nccwpck_require__(1514);
+const logging = __nccwpck_require__(1751);
+
+const RUNNER_TEMP = process.env.RUNNER_TEMP;
+const steamworks = path.join(RUNNER_TEMP, '.steamworks');
+const build_output = path.join(RUNNER_TEMP, 'output');
 
 async function Run() {
+    let printLogs = core.isDebug();
     try {
         // TODO Implement step cleanup and removing STEAM_DIR/config/config.vdf
         await exec.exec('echo "Hello, World!"');
     } catch (error) {
         core.setFailed(error.message);
     }
+
+    if (printLogs) {
+        await logging.PrintLogs(build_output);
+        await logging.PrintLogs(path.join(STEAM_DIR, 'logs'));
+        await logging.PrintLogs(path.join(steamworks, 'buildoutput'));
+    }
 };
 
 module.exports = { Run }
+
 
 /***/ }),
 
@@ -26354,6 +26397,7 @@ const exec = __nccwpck_require__(1514);
 const fs = __nccwpck_require__(3292);
 const path = __nccwpck_require__(1017);
 const steamTotp = __nccwpck_require__(3627);
+const logging = __nccwpck_require__(1751);
 
 const steamcmd = 'steamcmd';
 const STEAM_DIR = process.env.STEAM_DIR;
@@ -26375,32 +26419,14 @@ async function Run() {
     }
 
     if (printLogs) {
-        await printLogsInDirectory(build_output);
-        await printLogsInDirectory(path.join(STEAM_DIR, 'logs'));
-        await printLogsInDirectory(path.join(steamworks, 'buildoutput'));
+        await logging.PrintLogs(build_output);
+        await logging.PrintLogs(path.join(STEAM_DIR, 'logs'));
+        await logging.PrintLogs(path.join(steamworks, 'buildoutput'));
     }
 }
 
 module.exports = { Run }
 
-async function printLogsInDirectory(directory) {
-    core.debug(`Reading logs from: ${directory}`);
-    try {
-        const logs = await fs.readdir(directory);
-        for (const log of logs) {
-            try {
-                const logContent = await fs.readFile(log, 'utf8');
-                core.info(`::group::${log}`);
-                core.info(logContent);
-                core.info('::endgroup::');
-            } catch (error) {
-                log.error(`Failed to read log: ${log}\n${error}`);
-            }
-        }
-    } catch (error) {
-        core.error(`Failed to read logs in ${directory}!\n${error}`);
-    }
-}
 
 async function getCommandArgs() {
     if (!STEAM_DIR) {
@@ -28506,6 +28532,7 @@ const IsPost = !!core.getState('isPost');
 
 const main = async () => {
     if (!IsPost) {
+        core.saveState('isPost', 'true');
         await upload.Run();
     } else {
         await post.Run();

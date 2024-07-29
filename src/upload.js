@@ -3,6 +3,7 @@ const exec = require('@actions/exec');
 const fs = require('fs/promises');
 const path = require('path');
 const steamTotp = require('steam-totp');
+const logging = require('./logging');
 
 const steamcmd = 'steamcmd';
 const STEAM_DIR = process.env.STEAM_DIR;
@@ -24,32 +25,14 @@ async function Run() {
     }
 
     if (printLogs) {
-        await printLogsInDirectory(build_output);
-        await printLogsInDirectory(path.join(STEAM_DIR, 'logs'));
-        await printLogsInDirectory(path.join(steamworks, 'buildoutput'));
+        await logging.PrintLogs(build_output);
+        await logging.PrintLogs(path.join(STEAM_DIR, 'logs'));
+        await logging.PrintLogs(path.join(steamworks, 'buildoutput'));
     }
 }
 
 module.exports = { Run }
 
-async function printLogsInDirectory(directory) {
-    core.debug(`Reading logs from: ${directory}`);
-    try {
-        const logs = await fs.readdir(directory);
-        for (const log of logs) {
-            try {
-                const logContent = await fs.readFile(log, 'utf8');
-                core.info(`::group::${log}`);
-                core.info(logContent);
-                core.info('::endgroup::');
-            } catch (error) {
-                log.error(`Failed to read log: ${log}\n${error}`);
-            }
-        }
-    } catch (error) {
-        core.error(`Failed to read logs in ${directory}!\n${error}`);
-    }
-}
 
 async function getCommandArgs() {
     if (!STEAM_DIR) {

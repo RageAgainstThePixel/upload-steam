@@ -5,6 +5,7 @@ const IsPost = !!core.getState('isPost');
 
 const main = async () => {
     if (!IsPost) {
+        core.saveState('isPost', 'true');
         await upload.Run();
     } else {
         await post.Run();
