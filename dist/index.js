@@ -26339,16 +26339,16 @@ async function PrintLogs(directory) {
         const logs = await fs.readdir(directory, { recursive: true });
         for (const log of logs) {
             try {
-                const logContent = await fs.readFile(log, 'utf8');
+                const logContent = await fs.readFile(`${directory}/${log}`, 'utf8');
                 core.info(`::group::${log}`);
                 core.info(logContent);
                 core.info('::endgroup::');
             } catch (error) {
-                core.error(`Failed to read log: ${log}\n${error}`);
+                core.error(`Failed to read log: ${log}\n${error.message}`);
             }
         }
     } catch (error) {
-        core.error(`Failed to read logs in ${directory}!\n${error}`);
+        core.error(`Failed to read logs in ${directory}!\n${error.message}`);
     }
 }
 
@@ -26365,6 +26365,7 @@ const logging = __nccwpck_require__(1751);
 const path = __nccwpck_require__(1017);
 
 const STEAM_DIR = process.env.STEAM_DIR;
+const STEAM_CMD = process.env.STEAM_CMD;
 const RUNNER_TEMP = process.env.RUNNER_TEMP;
 const steamworks = path.join(RUNNER_TEMP, '.steamworks');
 
@@ -26374,7 +26375,7 @@ async function Run() {
         await logging.PrintLogs(path.join(STEAM_DIR, 'logs'));
         await logging.PrintLogs(path.join(STEAM_CMD, '..', 'logs'));
     } catch (error) {
-        core.setFailed(error.message);
+        core.error(error);
     }
 };
 
