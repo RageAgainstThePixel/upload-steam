@@ -26364,6 +26364,7 @@ const core = __nccwpck_require__(2186);
 const exec = __nccwpck_require__(1514);
 const logging = __nccwpck_require__(1751);
 
+const STEAM_DIR = process.env.STEAM_DIR;
 const RUNNER_TEMP = process.env.RUNNER_TEMP;
 const steamworks = path.join(RUNNER_TEMP, '.steamworks');
 const build_output = path.join(RUNNER_TEMP, 'output');
@@ -26426,7 +26427,6 @@ async function Run() {
 }
 
 module.exports = { Run }
-
 
 async function getCommandArgs() {
     if (!STEAM_DIR) {
@@ -28532,9 +28532,11 @@ const IsPost = !!core.getState('isPost');
 
 const main = async () => {
     if (!IsPost) {
+        core.info('Uploading mod to Steam Workshop...');
         core.saveState('isPost', 'true');
         await upload.Run();
     } else {
+        core.info('Finishing up...');
         await post.Run();
     }
 }

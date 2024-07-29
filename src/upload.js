@@ -33,7 +33,6 @@ async function Run() {
 
 module.exports = { Run }
 
-
 async function getCommandArgs() {
     if (!STEAM_DIR) {
         throw new Error('STEAM_DIR is not defined.');

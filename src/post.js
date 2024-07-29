@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 const logging = require('./logging');
 
+const STEAM_DIR = process.env.STEAM_DIR;
 const RUNNER_TEMP = process.env.RUNNER_TEMP;
 const steamworks = path.join(RUNNER_TEMP, '.steamworks');
 const build_output = path.join(RUNNER_TEMP, 'output');

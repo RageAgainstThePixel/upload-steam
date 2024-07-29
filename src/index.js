@@ -5,9 +5,11 @@ const IsPost = !!core.getState('isPost');
 
 const main = async () => {
     if (!IsPost) {
+        core.info('Uploading mod to Steam Workshop...');
         core.saveState('isPost', 'true');
         await upload.Run();
     } else {
+        core.info('Finishing up...');
         await post.Run();
     }
 }
