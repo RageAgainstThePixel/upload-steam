@@ -26363,6 +26363,7 @@ module.exports = { PrintLogs }
 const core = __nccwpck_require__(2186);
 const exec = __nccwpck_require__(1514);
 const logging = __nccwpck_require__(1751);
+const path = __nccwpck_require__(1017);
 
 const STEAM_DIR = process.env.STEAM_DIR;
 const RUNNER_TEMP = process.env.RUNNER_TEMP;
