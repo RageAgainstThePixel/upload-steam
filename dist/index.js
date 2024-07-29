@@ -26372,7 +26372,7 @@ async function Run() {
     try {
         await logging.PrintLogs(steamworks);
         await logging.PrintLogs(path.join(STEAM_DIR, 'logs'));
-        await logging.PrintLogs(path.join(STEAM_CMD, 'logs'));
+        await logging.PrintLogs(path.join(STEAM_CMD, '..', 'logs'));
     } catch (error) {
         core.setFailed(error.message);
     }
@@ -26415,7 +26415,7 @@ async function Run() {
 
     await logging.PrintLogs(steamworks);
     await logging.PrintLogs(path.join(STEAM_DIR, 'logs'));
-    await logging.PrintLogs(path.join(STEAM_CMD, 'logs'));
+    await logging.PrintLogs(path.join(STEAM_CMD, '..', 'logs'));
 
     if (fail) {
         core.setFailed(fail);
