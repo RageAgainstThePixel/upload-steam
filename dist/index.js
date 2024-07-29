@@ -26426,7 +26426,7 @@ async function Exec(args) {
         try {
             await fs.access(logFile);
             const log = await fs.readFile(logFile, 'utf8');
-            core.group(`${logFile}`);
+            core.startGroup(logFile);
             core.info(log);
             core.endGroup();
         } catch (error) {
