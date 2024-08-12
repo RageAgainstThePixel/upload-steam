@@ -3,6 +3,7 @@ const fs = require('fs/promises');
 const path = require('path');
 const steamTotp = require('steam-totp');
 const steamcmd = require('./steamcmd');
+
 const STEAM_DIR = process.env.STEAM_DIR;
 const STEAM_CMD = process.env.STEAM_CMD;
 
