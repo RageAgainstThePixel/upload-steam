@@ -26335,6 +26335,7 @@ const fs = __nccwpck_require__(3292);
 const path = __nccwpck_require__(1017);
 const steamTotp = __nccwpck_require__(3627);
 const steamcmd = __nccwpck_require__(404);
+
 const STEAM_DIR = process.env.STEAM_DIR;
 const STEAM_CMD = process.env.STEAM_CMD;
 
@@ -28528,11 +28529,10 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(2186);
 const upload = __nccwpck_require__(9265);
 const auth = __nccwpck_require__(4915);
+
 const STEAM_DIR = process.env.STEAM_DIR;
 const STEAM_CMD = process.env.STEAM_CMD;
 const STEAM_TEMP = process.env.STEAM_TEMP;
-
-const IS_POST = !!core.getState('isPost');
 
 const main = async () => {
     try {
@@ -28545,14 +28545,11 @@ const main = async () => {
         if (!STEAM_TEMP) {
             throw new Error('STEAM_TEMP is not defined.');
         }
-        if (!IS_POST) {
-            core.saveState('isPost', 'true');
-            const isLoggedIn = await auth.IsLoggedIn();
-            if (!isLoggedIn) {
-                await auth.Login();
-            }
-            await upload.Run();
+        const isLoggedIn = await auth.IsLoggedIn();
+        if (!isLoggedIn) {
+            await auth.Login();
         }
+        await upload.Run();
     } catch (error) {
         core.setFailed(error);
     }
