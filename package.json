@@ -26,7 +26,7 @@
     "steam-totp": "^2.1.2"
   },
   "devDependencies": {
-    "@types/node": "^24.0.0",
+    "@types/node": "^24.12.4",
     "@types/steam-totp": "^2.1.2",
     "@vercel/ncc": "^0.34.0",
     "shx": "^0.4.0",
